@@ -13,11 +13,9 @@ interface Message {
   timestamp: Date;
 }
 
-// Утилита форматирования текста
 function formatText(text: string): string {
   let formatted = text;
 
-  // Таблицы markdown (обрабатываем первыми)
   formatted = formatted.replace(/\n(\|.+\|\n)+/g, (match) => {
     const rows = match.trim().split("\n");
     let html = '<table class="min-w-full border-collapse my-4 text-sm">';
@@ -46,7 +44,6 @@ function formatText(text: string): string {
     return html;
   });
 
-  // Заголовки с #
   formatted = formatted.replace(
     /^#### (.*$)/gim,
     '<h4 class="text-base font-bold mt-4 mb-2">$1</h4>'
@@ -64,28 +61,23 @@ function formatText(text: string): string {
     '<h1 class="text-2xl font-bold mt-10 mb-5">$1</h1>'
   );
 
-  // Жирный текст
   formatted = formatted.replace(
     /\*\*(.*?)\*\*/g,
     '<strong class="font-semibold">$1</strong>'
   );
 
-  // Курсив (избегаем конфликта со звездочками)
   formatted = formatted.replace(/(?<!\*)\*([^*\n]+?)\*(?!\*)/g, "<em>$1</em>");
 
-  // Инлайн-код
   formatted = formatted.replace(
     /`([^`]+)`/g,
     '<code class="bg-gray-200 dark:bg-gray-700 px-1.5 py-0.5 rounded text-sm font-mono">$1</code>'
   );
 
-  // Нумерованные списки (обрабатываем ДО замены переносов)
   formatted = formatted.replace(
     /^(\d+)\.\s+(.+)$/gim,
     '<li class="ml-6">$2</li>'
   );
 
-  // Оборачиваем последовательные <li> в <ol>
   formatted = formatted.replace(
     /(<li class="ml-6">.*?<\/li>\n?)+/g,
     (match) => {
@@ -93,14 +85,11 @@ function formatText(text: string): string {
     }
   );
 
-  // Маркированные списки
   formatted = formatted.replace(/^[-•]\s+(.+)$/gim, '<li class="ml-6">$1</li>');
 
-  // Оборачиваем в <ul>
   formatted = formatted.replace(
     /(<li class="ml-6">.*?<\/li>\n?)+/g,
     (match) => {
-      // Проверяем, не внутри ли уже <ol>
       if (!match.includes("list-decimal")) {
         return `<ul class="my-2 list-disc list-inside space-y-1">${match}</ul>`;
       }
@@ -108,16 +97,13 @@ function formatText(text: string): string {
     }
   );
 
-  // Горизонтальная линия
   formatted = formatted.replace(
     /^---+$/gim,
     '<hr class="my-4 border-gray-300 dark:border-gray-600" />'
   );
 
-  // Абзацы
   formatted = formatted.replace(/\n\n/g, "<br /><br />");
 
-  // Одиночные переносы внутри абзацев
   formatted = formatted.replace(/\n(?!<)/g, "<br />");
 
   return formatted;
@@ -169,26 +155,23 @@ export default function App() {
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
-      let buffer = ""; // Буфер для накопления неполных строк
+      let buffer = "";
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
-        // Добавляем новый chunk к буферу
         buffer += decoder.decode(value, { stream: true });
 
-        // Разбиваем по двойным переносам строк
         const lines = buffer.split("\n\n");
 
-        // Последняя строка может быть неполной, сохраняем её в буфере
         buffer = lines.pop() || "";
 
         for (const line of lines) {
           if (line.startsWith("data: ")) {
             try {
               const jsonStr = line.slice(6).trim();
-              if (!jsonStr) continue; // Пропускаем пустые строки
+              if (!jsonStr) continue;
 
               const data = JSON.parse(jsonStr);
 
@@ -212,7 +195,6 @@ export default function App() {
         }
       }
 
-      // Обрабатываем остаток буфера
       if (buffer.trim() && buffer.startsWith("data: ")) {
         try {
           const jsonStr = buffer.slice(6).trim();
@@ -258,7 +240,6 @@ export default function App() {
               />
             ))}
 
-            {/* Стриминговое сообщение */}
             {isStreaming && partialResponse && (
               <div className="px-4 py-6">
                 <div className="p-6 rounded-2xl bg-liner-to-r from-purple-400/20 dark:from-purple-600/20 border border-purple-300/50 dark:border-purple-500/50 shadow-xl">

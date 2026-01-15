@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+
+Sitemap: https://your-domain.vercel.app/sitemap.xml
+
+
+Disallow: /api/
+Disallow: /_next/
