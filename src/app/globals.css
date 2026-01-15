@@ -1,0 +1,138 @@
+@import "tailwindcss";
+
+@layer components {
+  /* Контейнер для скролла таблиц */
+  .prose .table-wrapper {
+    overflow-x: auto;
+    overflow-y: visible;
+    max-width: 100%;
+    margin: 1rem 0;
+    /* Убираем отрицательные отступы */
+  }
+
+  /* Стилизация скроллбара только для таблиц */
+  .prose .table-wrapper::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .prose .table-wrapper::-webkit-scrollbar-track {
+    @apply bg-muted/50 rounded;
+  }
+
+  .prose .table-wrapper::-webkit-scrollbar-thumb {
+    @apply bg-border rounded;
+  }
+
+  .prose .table-wrapper::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground;
+  }
+
+  /* Firefox */
+  .prose .table-wrapper {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--color-border)) hsl(var(--color-muted) / 0.5);
+  }
+
+  .prose table {
+    @apply w-full border-collapse m-0;
+    table-layout: auto;
+    min-width: 600px; /* Минимальная ширина для активации скролла */
+  }
+
+  .prose th {
+    @apply bg-muted font-semibold text-left px-3 py-2 border border-border text-foreground text-sm whitespace-nowrap;
+  }
+
+  .prose td {
+    @apply px-3 py-2 border border-border text-foreground bg-card text-sm;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 300px;
+  }
+
+  /* Для мобильных устройств */
+  @media (max-width: 768px) {
+    .prose table {
+      min-width: 400px;
+    }
+
+    .prose th,
+    .prose td {
+      @apply px-2 py-1.5 text-xs;
+    }
+
+    .prose td {
+      max-width: 200px;
+    }
+  }
+}
+
+@theme {
+  --color-background: hsl(0 0% 100%);
+  --color-foreground: hsl(0 0% 9%);
+  --color-card: hsl(0 0% 100%);
+  --color-card-foreground: hsl(0 0% 9%);
+  --color-primary: hsl(0 0% 9%);
+  --color-primary-foreground: hsl(0 0% 98%);
+  --color-secondary: hsl(0 0% 96%);
+  --color-secondary-foreground: hsl(0 0% 9%);
+  --color-muted: hsl(0 0% 96%);
+  --color-muted-foreground: hsl(0 0% 45%);
+  --color-accent: hsl(0 0% 96%);
+  --color-accent-foreground: hsl(0 0% 9%);
+  --color-border: hsl(0 0% 89%);
+  --color-input: hsl(0 0% 89%);
+  --color-ring: hsl(0 0% 64%);
+}
+
+.dark {
+  --color-background: hsl(0 0% 9%);
+  --color-foreground: hsl(0 0% 95%);
+  --color-card: hsl(0 0% 11%);
+  --color-card-foreground: hsl(0 0% 95%);
+  --color-primary: hsl(0 0% 95%);
+  --color-primary-foreground: hsl(0 0% 11%);
+  --color-secondary: hsl(0 0% 15%);
+  --color-secondary-foreground: hsl(0 0% 95%);
+  --color-muted: hsl(0 0% 15%);
+  --color-muted-foreground: hsl(0 0% 64%);
+  --color-accent: hsl(0 0% 18%);
+  --color-accent-foreground: hsl(0 0% 95%);
+  --color-border: hsl(0 0% 23%);
+  --color-input: hsl(0 0% 23%);
+  --color-ring: hsl(0 0% 80%);
+}
+
+body {
+  @apply bg-background text-foreground;
+  font-feature-settings: "rlig" 1, "calt" 1;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+/* Стилизация скроллбара */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-border;
+  border-radius: 3px;
+  transition: background-color 0.2s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground;
+}
+
+/* Поддержка Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--color-border)) transparent;
+}
