@@ -7,7 +7,7 @@
 - **Next.js 16** - React фреймворк
 - **TypeScript 5** - типизация
 - **Tailwind CSS 4** - стили
-- **Ollama** - локальная LLM
+- **Ollama** - облачная LLM
 - **lucide-react** - иконки
 - **DOMPurify** - санитизация HTML
 
