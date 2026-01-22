@@ -11,8 +11,12 @@ export async function POST(req: NextRequest) {
       Authorization: "Bearer " + process.env.OLLAMA_API_KEY,
     },
   });
+  const res = await ollama.webSearch({
+    query: message,
+  });
   const stream = await ollama.chat({
     model: "gpt-oss:120b",
+
     messages: [
       {
         role: "system",
@@ -39,7 +43,10 @@ export async function POST(req: NextRequest) {
 - Помогать с IT, учебой, карьерой, саморазвитием, а не только шутить.
 `,
       },
-      { role: "user", content: message },
+      {
+        role: "user",
+        content: message + `Результаты поиска в интернете ${res}`,
+      },
     ],
     stream: true,
   });
@@ -59,12 +66,12 @@ export async function POST(req: NextRequest) {
                 content: part.message.content,
                 fullText,
                 done: false,
-              })}\n\n`
+              })}\n\n`,
             );
           }
         }
         controller.enqueue(
-          `data: ${JSON.stringify({ done: true, fullText })}\n\n`
+          `data: ${JSON.stringify({ done: true, fullText })}\n\n`,
         );
       } catch (error) {
         controller.error(error);

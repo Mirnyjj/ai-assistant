@@ -51,7 +51,7 @@ export const metadata: Metadata = {
       "Создаю современные веб-приложения на React, Next.js, TypeScript. Живое демо AI чат-приложения с markdown, темной темой и стримингом.",
     images: [
       {
-        url: "/og-image", // ← Автогенерация!
+        url: "/og-image",
         width: 1200,
         height: 630,
         alt: "AI Chat Assistant - Frontend Portfolio",
@@ -91,7 +91,6 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
 };
 
-// JSON-LD для Google Rich Results
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "ProfessionalService",
