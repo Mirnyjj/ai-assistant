@@ -1,5 +1,12 @@
 import { Ollama } from "ollama";
 import { NextRequest, NextResponse } from "next/server";
+import { getDate } from "@/app/getDate";
+
+type ResWebSearch = {
+  title: string;
+  url: string;
+  content: string;
+};
 
 export async function POST(req: NextRequest) {
   const { message } = await req.json();
@@ -11,8 +18,31 @@ export async function POST(req: NextRequest) {
     },
   });
   const res = await ollama.webSearch({
-    query: message,
+    query: `${message} актуальные данные на ${getDate()}`,
   });
+  let searchData = "";
+  if (res?.results && res.results.length > 0) {
+    searchData = (res.results as ResWebSearch[])
+      .slice(0, 5)
+      .map((result) => {
+        const cleanContent =
+          (result.content || "")
+            .replace(/\[.*?\]/g, "")
+            .replace(/\n\s*\n/g, "\n")
+            .replace(/ {2,}/g, " ")
+            .replace(/[^\w\s.,:–\-]/g, "")
+            .trim()
+            .slice(0, 300) + "...";
+        return `📄 ${result.title || "Новость"}\n${cleanContent}\n🔗 ${result.url}`;
+      })
+      .join("\n\n");
+  } else {
+  }
+
+  const prompt = searchData
+    ? `${message}\n\nАктуальные данные из интернета:\n${searchData}`
+    : message;
+
   const stream = await ollama.chat({
     model: "gpt-oss:120b",
 
@@ -38,16 +68,12 @@ export async function POST(req: NextRequest) {
 
 ТВОЯ ЦЕЛЬ:
 - Сделать так, чтобы человеку было интересно, уютно и одновременно полезно общаться.
-- Помогать с IT, учебой, карьерой, саморазвитием, а не только шутить.`,
+- Помогать с IT, учебой, карьерой, саморазвитием, а не только шутить.
+Добавляй в ответ данные из интернета с указанием ссылок`,
       },
       {
         role: "user",
-        content: message,
-      },
-      {
-        role: "tool_response",
-        tool_name: "web_search",
-        content: JSON.stringify(res.results),
+        content: prompt,
       },
     ],
     stream: true,
