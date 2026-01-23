@@ -20,56 +20,74 @@ export async function POST(req: NextRequest) {
   const res = await ollama.webSearch({
     query: `${message} актуальные данные на ${getDate()}`,
   });
+
   let searchData = "";
-  if (res?.results && res.results.length > 0) {
-    searchData = (res.results as ResWebSearch[])
-      .slice(0, 5)
-      .map((result) => {
-        const cleanContent =
-          (result.content || "")
-            .replace(/\[.*?\]/g, "")
-            .replace(/\n\s*\n/g, "\n")
-            .replace(/ {2,}/g, " ")
-            .replace(/[^\w\s.,:–\-]/g, "")
-            .trim()
-            .slice(0, 300) + "...";
-        return `📄 ${result.title || "Новость"}\n${cleanContent}\n🔗 ${result.url}`;
+
+  if (res?.results && (res.results as ResWebSearch[]).length > 0) {
+    const TRUSTED_SOURCES = [
+      "bbc.com",
+      "reuters.com",
+      "apnews.com",
+      "rbc.ru",
+      "ria.ru",
+      "tass.ru",
+    ];
+    const BAD_DOMAINS = ["ads.", "shop.", "buy.", "promo.", "forum.", "wiki."];
+
+    const filteredResults = (res.results as ResWebSearch[])
+      .filter((result) => {
+        if (BAD_DOMAINS.some((bad) => result.url.includes(bad))) return false;
+
+        return (
+          TRUSTED_SOURCES.some((source) => result.url.includes(source)) ||
+          result.title.toLowerCase().includes(message.toLowerCase()) ||
+          result.content.toLowerCase().includes(message.toLowerCase())
+        );
       })
-      .join("\n\n");
-  } else {
+      .slice(0, 3);
+
+    if (filteredResults.length > 0) {
+      searchData = filteredResults
+        .map((result, index) => {
+          const cleanContent =
+            (result.content || "")
+              .replace(/\[.*?\]/g, "")
+              .replace(/https?:\/\/[^\s]+/g, "")
+              .replace(/\s+/g, " ")
+              .replace(/[^\w\s.,:–\-!?()а-яёА-ЯЁ]/gi, "")
+              .trim()
+              .split(/\s+/)
+              .slice(0, 20)
+              .join(" ") + "...";
+
+          const shortTitle =
+            result.title.length > 60
+              ? result.title.slice(0, 60) + "..."
+              : result.title;
+
+          return `${index + 1}. "${shortTitle}"\n${cleanContent}\n🔗 ${result.url}`;
+        })
+        .join("\n\n");
+    }
   }
 
   const prompt = searchData
-    ? `${message}\n\nАктуальные данные из интернета:\n${searchData}`
-    : message;
+    ? `${message}\n\n📊 Актуальные данные (${searchData.split("\n\n").length} источников):\n${searchData}`
+    : `${message} (свежих данных из интернета нет)`;
 
   const stream = await ollama.chat({
     model: "gpt-oss:120b",
-
     messages: [
       {
         role: "system",
-        content: `Ты живой собеседник из глубокой русской деревни по имени Сеня. Работаешь в совхозе, говоришь простым деревенским языком, иногда с юмором и лёгким деревенским сленгом, часто добавляешь екарный бабай.
+        content: `Ты Сеня из русской деревни, работаешь в совхозе. Говоришь простым деревенским языком с юмором, добавляешь "екарный бабай".
 
-ТВОЙ ХАРАКТЕР:
-- Добродушный, ироничный, иногда подшучиваешь над собеседником, но без прямых оскорблений.
-- Любишь рассказывать истории "из жизни", сравнивать сложные вещи с деревенскими реалиями.
-- Иногда вставляешь деревенские выражения, но не материшься и не переходишь границы.
+ХАРАКТЕР: добродушный, ироничный, любишь деревенские сравнения
+ОПЫТ: бывший топовый IT-спец (backend/frontend/DevOps/AI)
+СТИЛЬ: кратко по делу + юмор, разговорный язык
+ПРАВИЛА: без мата, без токсичности, без нарушения законов
 
-ТВОЙ ОПЫТ:
-- В прошлой жизни ты был очень крутым IT-специалистом (backend, frontend, DevOps, AI — все знаешь от А до Я).
-- Сейчас объясняешь сложные IT-вещи простым, понятным языком, как будто рассказываешь соседу по деревне.
-
-СТИЛЬ ОБЩЕНИЯ:
-- Отвечай кратко по делу, а потом при желании можешь добавить забавное сравнение или мини-историю.
-- Используй разговорный стиль, можно без официальностей.
-- Не используй токсичную лексику, не нарушай законы и очевидные моральные границы.
-- Если тебя просят о вредных вещах — шутливо откажи и мягко переориентируй на что-то полезное.
-
-ТВОЯ ЦЕЛЬ:
-- Сделать так, чтобы человеку было интересно, уютно и одновременно полезно общаться.
-- Помогать с IT, учебой, карьерой, саморазвитием, а не только шутить.
-Добавляй в ответ данные из интернета с указанием ссылок`,
+ОБЯЗАТЕЛЬНО используй данные из интернета ниже (если есть) и указывай источники в скобках в конце предложения.`,
       },
       {
         role: "user",
