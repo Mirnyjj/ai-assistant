@@ -46,43 +46,43 @@ function formatText(text: string): string {
 
   formatted = formatted.replace(
     /^#### (.*$)/gim,
-    '<h4 class="text-base font-bold mt-4 mb-2">$1</h4>'
+    '<h4 class="text-base font-bold mt-4 mb-2">$1</h4>',
   );
   formatted = formatted.replace(
     /^### (.*$)/gim,
-    '<h3 class="text-lg font-bold mt-6 mb-3">$1</h3>'
+    '<h3 class="text-lg font-bold mt-6 mb-3">$1</h3>',
   );
   formatted = formatted.replace(
     /^## (.*$)/gim,
-    '<h2 class="text-xl font-bold mt-8 mb-4">$1</h2>'
+    '<h2 class="text-xl font-bold mt-8 mb-4">$1</h2>',
   );
   formatted = formatted.replace(
     /^# (.*$)/gim,
-    '<h1 class="text-2xl font-bold mt-10 mb-5">$1</h1>'
+    '<h1 class="text-2xl font-bold mt-10 mb-5">$1</h1>',
   );
 
   formatted = formatted.replace(
     /\*\*(.*?)\*\*/g,
-    '<strong class="font-semibold">$1</strong>'
+    '<strong class="font-semibold">$1</strong>',
   );
 
   formatted = formatted.replace(/(?<!\*)\*([^*\n]+?)\*(?!\*)/g, "<em>$1</em>");
 
   formatted = formatted.replace(
     /`([^`]+)`/g,
-    '<code class="bg-gray-200 dark:bg-gray-700 px-1.5 py-0.5 rounded text-sm font-mono">$1</code>'
+    '<code class="bg-gray-200 dark:bg-gray-700 px-1.5 py-0.5 rounded text-sm font-mono">$1</code>',
   );
 
   formatted = formatted.replace(
     /^(\d+)\.\s+(.+)$/gim,
-    '<li class="ml-6">$2</li>'
+    '<li class="ml-6">$2</li>',
   );
 
   formatted = formatted.replace(
     /(<li class="ml-6">.*?<\/li>\n?)+/g,
     (match) => {
       return `<ol class="my-2 list-decimal list-inside space-y-1">${match}</ol>`;
-    }
+    },
   );
 
   formatted = formatted.replace(/^[-•]\s+(.+)$/gim, '<li class="ml-6">$1</li>');
@@ -94,12 +94,12 @@ function formatText(text: string): string {
         return `<ul class="my-2 list-disc list-inside space-y-1">${match}</ul>`;
       }
       return match;
-    }
+    },
   );
 
   formatted = formatted.replace(
     /^---+$/gim,
-    '<hr class="my-4 border-gray-300 dark:border-gray-600" />'
+    '<hr class="my-4 border-gray-300 dark:border-gray-600" />',
   );
 
   formatted = formatted.replace(/\n\n/g, "<br /><br />");
@@ -146,7 +146,13 @@ export default function App() {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: content }),
+        body: JSON.stringify({
+          message: content,
+          history: messages.map((msg) => ({
+            role: msg.role,
+            content: msg.content,
+          })),
+        }),
       });
 
       if (!response.body) {
@@ -182,6 +188,7 @@ export default function App() {
                   content: data.fullText,
                   timestamp: new Date(),
                 };
+                // setMessages((prev) => [...prev, assistantMessage]);
                 setMessages((prev) => [...prev, assistantMessage]);
                 setIsStreaming(false);
                 setPartialResponse("");

@@ -9,7 +9,7 @@ type ResWebSearch = {
 };
 
 export async function POST(req: NextRequest) {
-  const { message } = await req.json();
+  const { message, history = [] } = await req.json();
 
   const ollama = new Ollama({
     host: "https://ollama.com",
@@ -89,6 +89,7 @@ export async function POST(req: NextRequest) {
 
 ОБЯЗАТЕЛЬНО используй данные из интернета ниже (если есть) и указывай источники в скобках в конце предложения.`,
       },
+      ...history,
       {
         role: "user",
         content: prompt,
