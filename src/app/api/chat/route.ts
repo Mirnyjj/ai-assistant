@@ -31,8 +31,29 @@ export async function POST(req: NextRequest) {
       "rbc.ru",
       "ria.ru",
       "tass.ru",
+      "lenta.ru",
+      "gazeta.ru",
+      "kommersant.ru",
+      "news.yandex.ru",
+      "habr.com",
+      "vc.ru",
     ];
-    const BAD_DOMAINS = ["ads.", "shop.", "buy.", "promo.", "forum.", "wiki."];
+
+    const BAD_DOMAINS = [
+      "ads.",
+      "shop.",
+      "buy.",
+      "promo.",
+      "forum.",
+      "wiki.",
+      "магазин.",
+      "купить.",
+      "реклама.",
+      "акции.",
+      "скидки.",
+      "продам.",
+      "доска.",
+    ];
 
     const filteredResults = (res.results as ResWebSearch[])
       .filter((result) => {
